@@ -342,9 +342,6 @@ function App() {
 
             if (response.ok) {
                 const data = await response.json();
-                console.log('Image uploaded successfully!');
-                console.log(data.message);
-                console.log(data.grid);
 
                 setGrid(data.grid);
 
@@ -502,9 +499,9 @@ function App() {
                         <h3 className="font-mulish -mt-2">Upload Image or Screenshot</h3>
                         <p className="font-mulish text-left mt-3 w-[80%]">Please upload an image of a sudoku board:
                             <li>Must be a 9×9 grid representing a Sudoku puzzle</li>
-                            <li>Each cell contains a number from 1 to 9, or -1 if unknown</li>
-                            <li>Clear outer grid boundary and digit values</li>
-                            <li>Cell widths and heights must be square and even</li>
+                            <li>Cells contain a number 1 to 9, or -1 if unknown</li>
+                            <li>Digits are preferably typed (not handwritten)</li>
+                            <li>Clear outer grid boundary with square, evenly-sized cells</li>
                         </p>
                         <div className= "flex flex-row shrink mt-6 items-center">
                             <form onSubmit={handleImage}>

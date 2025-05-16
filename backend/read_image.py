@@ -3,7 +3,7 @@ import cv2 # for image processing
 import numpy as np # for numerical processing
 import keras
 import tensorflow as tf
-model = tf.keras.models.load_model('kaggle_digit_model.h5')
+model = tf.keras.models.load_model('digits_model_2.keras')
 
 # isolate the board from the rest of the image and warp to a flat perspective
 def process_outer_board(img):
@@ -79,53 +79,67 @@ def get_digits(cells):
         cell_thresh = cv2.adaptiveThreshold(resized, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, 
                                         cv2.THRESH_BINARY_INV, 11, 8)
         
-        # find contours in the cell and sort by largest area
-        contours, _ = cv2.findContours(cell_thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        contours = sorted(contours, key=cv2.contourArea, reverse=True)
-        
-        height, width = resized.shape[:2]
-        digit_found = False
-        
-        # loop through contours to find the digit contour
-        for j, contour in enumerate(contours):
-            # get bounding rectangle and area
-            x, y, w, h = cv2.boundingRect(contour)
-            area = cv2.contourArea(contour)
+        # format correctly for model input
+        model_input = cell_thresh.reshape(1, 28, 28, 1)
+        model_input = model_input.astype('float32') / 255.0
 
-            # if not touching the edge and the area is big enough, it's likely the digit
-            if (x > 0 and y > 0 and x + w < width and y + h < height and area > 16 and not digit_found):   
-                digit_found = True            
-                
-                # add small padding around the digit
-                padding = 1
-                x_start = max(0, x - padding)
-                y_start = max(0, y - padding)
-                x_end = min(width, x + w + padding)
-                y_end = min(height, y + h + padding)
-                
-                # make mask of all white
-                digit_mask = np.zeros_like(cell_thresh)
-                digit_mask[y_start : y_end, x_start : x_end] = 255 
-                
-                # apply the mask get only the digit without grid lines, noise, etc
-                processed_cell = cv2.bitwise_and(cell_thresh, digit_mask)
-                model_input = processed_cell.reshape(1, 28, 28, 1)
-                model_input = model_input.astype('float32') / 255.0
+        # predict digit
+        prediction = model.predict(model_input, verbose=0)
+        predicted_digit = np.argmax(prediction[0])
 
-                # make prediction
-                prediction = model.predict(model_input, verbose=0)
-                predicted_digit = np.argmax(prediction[0])
-        
-        # add the value to the array
-        if digit_found:
-            # empty cell that wasn't caught in preprocessing
-            if predicted_digit == 0:
-                digits.append(-1)
-            else:
-                digits.append(predicted_digit)
-        else:
-            # empty cell that was caught in preprocessing
+        # add digit to array
+        if predicted_digit == 0:
             digits.append(-1)
+        else:
+            digits.append(predicted_digit)
+        
+        # find contours in the cell and sort by largest area
+        # contours, _ = cv2.findContours(cell_thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        # contours = sorted(contours, key=cv2.contourArea, reverse=True)
+        
+        # height, width = resized.shape[:2]
+        # digit_found = False
+        
+        # # loop through contours to find the digit contour
+        # for j, contour in enumerate(contours):
+        #     # get bounding rectangle and area
+        #     x, y, w, h = cv2.boundingRect(contour)
+        #     area = cv2.contourArea(contour)
+
+        #     # if not touching the edge and the area is big enough, it's likely the digit
+        #     if (x > 0 and y > 0 and x + w < width and y + h < height and area > 16 and not digit_found):   
+        #         digit_found = True            
+                
+        #         # add small padding around the digit
+        #         padding = 1
+        #         x_start = max(0, x - padding)
+        #         y_start = max(0, y - padding)
+        #         x_end = min(width, x + w + padding)
+        #         y_end = min(height, y + h + padding)
+                
+        #         # make mask of all white
+        #         digit_mask = np.zeros_like(cell_thresh)
+        #         digit_mask[y_start : y_end, x_start : x_end] = 255 
+                
+        #         # apply the mask get only the digit without grid lines, noise, etc
+        #         processed_cell = cv2.bitwise_and(cell_thresh, digit_mask)
+        #         model_input = processed_cell.reshape(1, 28, 28, 1)
+        #         model_input = model_input.astype('float32') / 255.0
+
+        #         # make prediction
+        #         prediction = model.predict(model_input, verbose=0)
+        #         predicted_digit = np.argmax(prediction[0])
+        
+        # # add the value to the array
+        # if digit_found:
+        #     # empty cell that wasn't caught in preprocessing
+        #     if predicted_digit == 0:
+        #         digits.append(-1)
+        #     else:
+        #         digits.append(predicted_digit)
+        # else:
+        #     # empty cell that was caught in preprocessing
+        #     digits.append(-1)
 
     # reshape to 2d array
     digits = np.reshape(digits, (9, 9))
@@ -139,33 +153,4 @@ def parser(filename):
     digits = get_digits(cells)
 
     return digits
-
-# BELOW: used for testing
-# if __name__ == '__main__':
-#     # TODO: change image!!!
-#     img = cv2.imread('sudoku_picture.jpg', 0)
-#     warped = process_outer_board(img)
-#     cells = split_into_cells(warped)
-
-#     digits = get_digits(cells)
-
-#     print(digits)
-
-#     correct = [[8, -1, -1, -1, 1, -1, -1, -1, 9], 
-#                [-1, 5, -1, 8, -1, 7, -1, 1, -1],
-#                [-1, -1, 4, -1, 9, -1, 7, -1, -1],
-#                [-1, 6, -1, 7, -1, 1, -1, 2, -1],
-#                [5, -1, 8, -1, 6, -1, 1, -1, 7],
-#                [-1, 1, -1, 5, -1, 2, -1, 9, -1],
-#                [-1, -1, 7, -1 ,4, -1, 6, -1, -1],
-#                [-1, 8, -1, 3, -1, 9, -1, 4, -1],
-#                [3, -1, -1, -1, 5, -1 ,-1, -1, 8]]
-
-#     count = 0
-#     for i, row in enumerate(digits):
-#         for j, elem in enumerate(row):
-#             if elem == correct[i][j]:
-#                 count += 1
-            
-#     print(count)
 
