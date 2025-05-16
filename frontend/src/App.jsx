@@ -1,10 +1,16 @@
 import React from 'react'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css'
 import Papa from 'papaparse';
 import Spinner from 'react-bootstrap/Spinner';
 
+const duplicateError = "No duplicates allowed within rows, columns, or inner grids";
+const digitError = "Please enter a digit between 1 and 9";
+const noSolutionError = "No solution, check that all inputs are as intended";
+const csvDimensionError = "Incorrect CSV format: wrong dimensions";
+const serverError = "Server error: check connection and try again";
+const imageCancelError = "Image upload cancelled"
 
 function App() {
     // create initial empty grid
@@ -58,10 +64,11 @@ function App() {
     // keeps track of duplicate, solve, server, and value, and format error
     const [error, setError] = useState(""); 
 
+    const abortControllerRef = useRef(null);
+
     const [showCSVModal, setShowCSVModal] = useState(false);
     const [showImageModal, setShowImageModal] = useState(false);
-    const [showWarningModal, setShowWarningModal] = useState(false);
-
+    const [showConfirmationModal, setShowConfirmationModal] = useState(false);
     
     // store unfilled input positions before solving, empty at first
     const [unfilledPositions, setUnfilledPositions] = useState(createEntireUnfilledPositions());
@@ -97,7 +104,7 @@ function App() {
 
         // if not a number (which means not a digit, since we limit input to 1 character), show error
         if (isNaN(newVal)) {
-            setError("Please enter a digit between 1 and 9")
+            setError(digitError)
             return;
         }
 
@@ -106,7 +113,7 @@ function App() {
 
         // if not 1-9, show error
         if (numVal < 1 || numVal > 9) {
-            setError("Please enter a digit between 1 and 9")
+            setError(digitError)
             return;
         }
         
@@ -116,7 +123,7 @@ function App() {
         const blockDuplicate = checkBlock(grid, numVal, rowIndex, colIndex);
 
         if (rowDuplicate || colDuplicate || blockDuplicate) {
-            setError("No duplicates allowed within rows, columns, or inner grids");
+            setError(duplicateError);
             return;
         }
 
@@ -220,7 +227,7 @@ function App() {
             setError("");
 
         } else {
-            setError("No solution, check that all inputs are as intended");
+            setError(noSolutionError);
         }
     };
 
@@ -257,13 +264,13 @@ function App() {
                 console.log('Parsed CSV data:', results.data);
                 // make sure there are 9 rows
                 if (results.data.length != 9) {
-                    setError("Incorrect CSV format: wrong row count");
+                    setError(csvDimensionError);
                     return;
                 }
                 for (let r = 0; r < 9; r++) {
                     // make sure there are 9 columns
                     if (results.data[r].length != 9) {
-                        setError("Incorrect CSV format: wrong column count");
+                        setError(csvDimensionError);
                         return;
                     }
 
@@ -272,11 +279,11 @@ function App() {
                         const intResult = parseInt(results.data[r][c]);
                         // make sure element is a valid value
                         if (isNaN(intResult) || !Number.isInteger(intResult)) {
-                            setError(`Value at row ${r}, column ${c} is not a valid integer`);
+                            setError(`Incorrect CSV format: row ${r}, column ${c} is not a valid integer`);
                             return;
                         }
                         if ((intResult != -1) && (intResult < 1 || intResult > 9)) {
-                            setError(`Value at row ${r}, column ${c} must be -1 or between 1-9`);
+                            setError(`Incorrect CSV format: row ${r}, column ${c} must be -1 or between 1-9`);
                             return;
                         }
 
@@ -302,7 +309,7 @@ function App() {
                         results.data[r][c] = val;
 
                         if (rowDuplicate || colDuplicate || blockDuplicate) {
-                            setError(`Duplicate value ${val} found at row ${r}, column ${c}`);
+                            setError(`Incorrect CSV format: duplicate value ${val} found at row ${r}, column ${c}`);
                             setGrid(results.data);
                             setSubmitted(false);
                             return;
@@ -323,6 +330,10 @@ function App() {
 
     const handleImage = async (e) => {
         e.preventDefault(); // prevent form from refreshing
+
+        abortControllerRef.current = new AbortController();
+        const signal = abortControllerRef.current.signal;
+
         const fileInput = document.getElementById('image_file');
         const file = fileInput.files[0];
         if (!file) {
@@ -338,27 +349,29 @@ function App() {
             const response = await fetch('http://localhost:5000/image', {
                 method: 'POST',
                 body: formData,
+                signal: signal
             });
 
             if (response.ok) {
                 const data = await response.json();
 
                 setGrid(data.grid);
-
-                setShowLoadSpinner(false);
-                setShowImageModal(false);
-
-                setShowWarningModal(true);
+                setShowConfirmationModal(true);
                 setError("")
             } else {
-                setError("Error sending image to server")
-                setShowLoadSpinner(false);
-                setShowImageModal(false);
+                setError(serverError)
             }
 
         } catch (error) {
-            console.error('Error:', error);
-            setError("Error sending image to server")
+            if (error.name === 'AbortError') {
+                setError(imageCancelError);
+                setSubmitted(false);
+            } else {
+                console.error('Error:', error);
+                setError(serverError)
+            }
+            
+        } finally {
             setShowLoadSpinner(false);
             setShowImageModal(false)
         }
@@ -369,7 +382,6 @@ function App() {
         try {
             // save current state before solving
             setPrevGrid([...grid.map(row => [...row])]);
-            //setUnfilledPositions(createUnfilledPositions());
             const positions = new Set();
             for (let i = 0; i < 9; i++) {
                 for (let j = 0; j < 9; j++) {
@@ -397,7 +409,7 @@ function App() {
             return result;
             
         } catch (err) {
-            setError("Error sending board to server");
+            setError(serverError);
             return null;
         }
     }
@@ -451,7 +463,6 @@ function App() {
         // Highlight if the cell was empty before solving
         return unfilledPositions.has(key);
     };
-    
 
     return (
         <div className="flex flex-col items-center justify-start">
@@ -489,7 +500,14 @@ function App() {
             {showImageModal && (
                 <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 h-[350px] w-[500px] max-w-[80%] rounded-md bg-white shadow-lg z-50">
                     <div className="relative w-full">
-                        <button className="absolute top-2 right-2 z-60" onClick={() => {setShowImageModal(false); setShowLoadSpinner(false)}}>
+                        <button className="absolute top-2 right-2 z-60" 
+                                onClick={() => {
+                                    if (abortControllerRef.current) {
+                                        abortControllerRef.current.abort();
+                                    }
+                                    setShowImageModal(false);
+                                    setShowLoadSpinner(false);
+                                }}>
                             <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="#DC143C" className="bi bi-x" viewBox="0 0 16 16">
                                 <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
                             </svg>
@@ -500,8 +518,8 @@ function App() {
                         <p className="font-mulish text-left mt-3 w-[80%]">Please upload an image of a sudoku board:
                             <li>Must be a 9×9 grid representing a Sudoku puzzle</li>
                             <li>Cells contain a number 1 to 9, or -1 if unknown</li>
+                            <li>MUST HAVE clear outer grid boundary with square, evenly-sized cells</li>
                             <li>Digits are preferably typed (not handwritten)</li>
-                            <li>Clear outer grid boundary with square, evenly-sized cells</li>
                         </p>
                         <div className= "flex flex-row shrink mt-6 items-center">
                             <form onSubmit={handleImage}>
@@ -516,11 +534,11 @@ function App() {
                     </div>
                 </div>
             )}
-            {/* warning modal for image parsing */}
-            {showWarningModal && 
+            {/* confirmation modal for image parsing */}
+            {showConfirmationModal && 
                 (<div className={`fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 h-[250px] w-[500px] max-w-[80%] bg-white rounded-md z-50`}>
                     <div className="relative w-full">
-                        <button className="absolute top-2 right-2 z-60" onClick={() => setShowWarningModal(false)}>
+                        <button className="absolute top-2 right-2 z-60" onClick={() => setShowConfirmationModal(false)}>
                             <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="#DC143C" className="bi bi-x" viewBox="0 0 16 16">
                                 <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
                             </svg>
@@ -540,7 +558,7 @@ function App() {
                     className={`absolute left-[105%] bottom-[50%] ${submitted ? "cursor-not-allowed" : ""}`} 
                     onClick={handleHint}
                     >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="#F4BB44" class="bi bi-lightbulb mt-4" viewBox="0 0 16 16">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="#F4BB44" className="bi bi-lightbulb mt-4" viewBox="0 0 16 16">
                         <path d="M2 6a6 6 0 1 1 10.174 4.31c-.203.196-.359.4-.453.619l-.762 1.769A.5.5 0 0 1 10.5 13a.5.5 0 0 1 0 1 .5.5 0 0 1 0 1l-.224.447a1 1 0 0 1-.894.553H6.618a1 1 0 0 1-.894-.553L5.5 15a.5.5 0 0 1 0-1 .5.5 0 0 1 0-1 .5.5 0 0 1-.46-.302l-.761-1.77a2 2 0 0 0-.453-.618A5.98 5.98 0 0 1 2 6m6-5a5 5 0 0 0-3.479 8.592c.263.254.514.564.676.941L5.83 12h4.342l.632-1.467c.162-.377.413-.687.676-.941A5 5 0 0 0 8 1"/>
                     </svg>
                 </button>
