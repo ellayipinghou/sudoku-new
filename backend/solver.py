@@ -214,6 +214,7 @@ def calculate_domain(board: list, row_index: int, col_index: int):
     grid_col_start = (math.floor(col_index / 3) * 3)
     curr_row = grid_row_start 
     curr_col = grid_col_start
+    
     while curr_row <= grid_row_start + 2 and curr_col <= grid_col_start + 2:
         elem = board[curr_row][curr_col]
         if elem in domain and elem != -1:
