@@ -2,20 +2,21 @@ import React from 'react'
 import { useState, useEffect} from 'react'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css'
-import CSVModal from "../components/CSVModal"
-import ImageModal from "../components/ImageModal"
-import ImageConfirmationModal from '../components/ImageConfirmationModal';
-import Header from "../components/Header";
-import SolveButton from '../components/SolveButton';
-import UnsolveButton from '../components/UnsolveButton';
-import ResetButton from '../components/ResetButton';
-import CSVButton from '../components/CSVButton';
-import ImageButton from '../components/ImageButton';
+import CSVModal from "./components/CSVModal"
+import ImageModal from "./components/ImageModal"
+import ImageConfirmationModal from './components/ImageConfirmationModal';
+import Header from "./components/Header";
+import SolveButton from './components/SolveButton';
+import UnsolveButton from './components/UnsolveButton';
+import ResetButton from './components/ResetButton';
+import CSVButton from './components/CSVButton';
+import ImageButton from './components/ImageButton';
 
 // possible errors - see component files for more errors
 const duplicateError = "No duplicates allowed within rows, columns, or inner grids";
 const valueError = "Please enter a digit between 1 and 9";
 const noSolutionError = "No solution, check that all inputs are as intended";
+const serverError = "Server error: check connection and try again";
 
 function App() {
     // create initial empty grid
@@ -294,7 +295,7 @@ function App() {
 
         } else {
             // case: no solution
-            setSolveError(true);
+            setError(noSolutionError);
             setError("");
         }
     }
