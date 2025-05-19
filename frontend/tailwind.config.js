@@ -1,4 +1,3 @@
-/** @type {import('tailwindcss').Config} */
 export default {
   content: [
     './src/**/*.{js,jsx,ts,tsx}',
@@ -7,7 +6,7 @@ export default {
   theme: {
     extend: {
       fontFamily : {
-        kaushan: ['Kaushan Script', 'sans-serif'],
+        kaushan: ['Kaushan Script', 'serif'],
         mulish: ['Mulish', 'sans-serif']
       }
     },

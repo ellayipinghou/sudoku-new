@@ -76,7 +76,7 @@ function App() {
     // store unfilled input positions before solving, used for calculating which cells should have a green highlight
     const [unfilledPositions, setUnfilledPositions] = useState(createEntireUnfilledPositions());
 
-    // store the most recent element that hint revealed, used for temporary green highligh
+    // store the most recent element that hint revealed, used for temporary green highlight
     const [hintElem, setHintElem] = useState(null);
 
     // store the current error
@@ -167,7 +167,7 @@ function App() {
         setUnfilledPositions(newUnfilled);
     }
 
-    // calcualte which borders a cell should have and how thick, used to avoid stacking issues
+    // calculate which borders a cell should have and how thick, used to avoid stacking issues
     const getCellBorderClasses = (rowInBox, colInBox, boxRow, boxCol) => {
         let classes = "";
         
@@ -263,7 +263,7 @@ function App() {
         // get the result
         const result = await getResult();
 
-        // if there was a server error, return
+        // if there was a server error, it's passed as null - return
         if (result == null) {
             return
         } 
@@ -366,7 +366,7 @@ function App() {
 
     return (
         <div className="flex flex-col items-center justify-start">
-            <div className="fixed inset-0 -z-10 bg-cover bg-center opacity-40 min-h-screen"
+            <div className="fixed inset-0 -z-10 bg-cover bg-center opacity-40"
                 style={{ backgroundImage: "url('/src/assets/paper-background.jpg')" }}>
             </div>
             {/* modal for CSV upload button */}
