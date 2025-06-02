@@ -291,7 +291,7 @@ function App() {
             setHintElem([rowIndex, colIndex]);
             setTimeout(() => {
                 setHintElem(null);
-            }, 2000);
+            }, 1500);
 
         } else {
             // case: no solution
