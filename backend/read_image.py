@@ -104,8 +104,8 @@ def get_digits(cells):
     return digits
 
 # main function that takes in an image of a sudoku board and returns an array of digits
-def parser(filename):
-    img = cv2.imread(filename, 0)
+def parser(file_path):
+    img = cv2.imread(file_path, 0)
     warped = process_outer_board(img)
     cells = split_into_cells(warped)
     digits = get_digits(cells)

@@ -387,7 +387,7 @@ function App() {
             </p>
         
             {/* main sudoku grid */}
-            <div className={`flex flex-col items-center ${gridSize}`}>
+            <div className={`flex flex-col ${gridSize}`}>
                 <div className="aspect-square border-4 border-black grid grid-rows-3 grid-cols-3 w-full">
                     {/* map the large grid rows - rows 0, 1, 2 
                         use fragment to group multiple elements without adding extra nodes to the DOM

@@ -27,7 +27,9 @@ def solve_sudoku():
                 for row_index, row in enumerate(grid):
                         for col_index, elem in enumerate(row):
                                 if grid[row_index][col_index] == -1:
-                                        to_assign[row_index, col_index] = []
+                                        to_assign[(row_index, col_index)] = []
+
+                print(to_assign)
 
                 # get solution
                 solution = solve(grid, to_assign)
@@ -54,7 +56,7 @@ def parse_image():
                         return jsonify({'message': 'No selected file'}), 400
                 
                 # create relative file path to upload folder
-                file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+                file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename) # uploads/filename
                 file.save(file_path)
 
                 # parse the image
