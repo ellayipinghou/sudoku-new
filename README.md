@@ -1,21 +1,21 @@
-# 🔍 Sudoku Solver
+# Sudoku Solver 🔎
 
-## 📜 Overview
+## Overview 📜
 This is a full-stack web application designed to solve Sudoku puzzles, with support for various input modes. The application utilizes a backtracking algorithm for solving puzzles and a digit recognition model for processing Sudoku images. The backend is built using Python (Flask), while the frontend leverages React, Tailwind CSS, and Vite for a smooth user experience.
 
-## Input Modes
+## Input Modes 💻
 * ✏️ **Manual Input:** Input Sudoku puzzles by typing the board into the interface.
 * 📄 **CSV Upload:** Upload CSV files containing Sudoku puzzles for automatic solving. A modal will pop up when the button is clicked to specify the required format for the CSV file.
 * 📷 **Image Upload:** Upload images of Sudoku puzzles, which are processed using a digit recognition model to convert the image into a board. A modal will pop up when the button is clicked to specify the required format for the image file.
 
-## Features
+## Features ✨
 * ✅ **Solve:** Solve the sudoku puzzle. Answers not in the original board will be highlighted in green.
 * 🕥 **Unsolve:**: Return to the board's state before hitting "solve".
 * 💡 **Hint:** Get step-by-step hints by revealing one digit of the solution at a time. Revealed digit will be temporarily highlighted in green.
 * 🧹 **Reset:** Reset to an empty board.
 * ‼️ **Error-checking**: Automatic error-checking for duplicate or invalid inputs, displayed through a message.
 
-## Installation
+## Installation 🔧
 To set up the project locally, follow these steps:
 
 ### Prerequisites
@@ -88,7 +88,7 @@ cd frontend
 npm run dev
 ```
 
-## ©️ Credits for Image Recognition Model
+## Credits for Image Recognition Model ©️
 The Sudoku Solver uses a digit recognition model trained on the [Kaggle Printed Digits Dataset](https://www.kaggle.com/datasets/kshitijdhama/printed-digits-dataset) , Copyright (c) 2021 Kshitij Dhama. The model is stored in the file new_digit_model.keras and is used for digit classification when an image of a Sudoku puzzle is uploaded.
 
 If you plan to distribute this app or use the dataset in any way, please make sure to give proper credit to the original dataset creator.
