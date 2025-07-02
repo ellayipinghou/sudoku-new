@@ -28,14 +28,20 @@ node --version
 ```
 ### 1. Clone the Repository
 ```
-git clone https://github.com/yourusername/sudoku-solver-web-app.git
-cd sudoku-solver-web-app
+git clone https://github.com/ellayipinghou/sudoku-new.git
+cd sudoku-new
 ```
 
 ### 2. Backend Setup
 #### a. Create a Python virtual environment:
+On Windows (with Python launcher):
 ```
-python -m venv venv
+py -3.10 -m venv venv
+```
+
+On Mac/Linux:
+```
+python3.10 -m venv venv
 ```
 #### b. Activate the virtual environment:
 
@@ -65,28 +71,23 @@ pillow==11.2.1
 tensorflow==2.19.0
 ```
 ### 3. Frontend Setup
-Change into the frontend directory:
+Change into the frontend directory and install Node.js dependencies:
 ```
 cd frontend
-```
-
-Install Node.js dependencies:
-```
 npm install
 ```
 
 ### 4. Run the Application
-Start the backend:
+Start the frontend (React app with Vite):
+```
+npm run dev
+```
+
+In a separate terminal, start the backend:
 
 ```
 cd backend
 flask run
-```
-
-Start the frontend (React app with Vite):
-```
-cd frontend
-npm run dev
 ```
 
 ## Credits for Image Recognition Model ©️
