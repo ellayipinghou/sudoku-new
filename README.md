@@ -7,13 +7,13 @@ This is a full-stack web application designed to solve Sudoku puzzles, with supp
 * ✏️ **Manual Input:** Input Sudoku puzzles by typing the board into the interface.
 * 📄 **CSV Upload:** Upload CSV files containing Sudoku puzzles for automatic solving. A modal will pop up when the button is clicked to specify the required format for the CSV file.
 * 📷 **Image Upload:** Upload images of Sudoku puzzles, which are processed using a digit recognition model to convert the image into a board. A modal will pop up when the button is clicked to specify the required format for the image file.
+* 🔮 **Random:** Generate a random board with a unique solution.
 
 ## Features ✨
 * ✅ **Solve:** Solve the sudoku puzzle. Answers not in the original board will be highlighted in green. If multiple solutions exist, only one solution will be shown.
 * 🕥 **Unsolve:**: Return to the board's state before hitting "solve".
 * 💡 **Hint:** Get step-by-step hints by revealing one digit of the solution at a time. Revealed digit will be temporarily highlighted in green.
 * 🧹 **Reset:** Reset to an empty board.
-* 🔮 **Random:** Generate a random board with a unique solution.
 * ‼️ **Error-checking**: Automatic error-checking for duplicate or invalid inputs, displayed through a message.
 
 ## Installation 🔧
