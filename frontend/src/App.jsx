@@ -11,6 +11,8 @@ import UnsolveButton from './components/UnsolveButton';
 import ResetButton from './components/ResetButton';
 import CSVButton from './components/CSVButton';
 import ImageButton from './components/ImageButton';
+import RandomButton from './components/RandomButton';
+
 
 // possible errors - see component files for more errors
 const duplicateError = "No duplicates allowed within rows, columns, or inner grids";
@@ -73,6 +75,9 @@ function App() {
     // store the puzzle solving status, used for disabling certain buttons
     const [isSolved, setIsSolved] = useState(false);
 
+    // store the puzzle filled status, used for disabling certain buttons
+    const [isFull, setIsFull] = useState(false);
+
     // store unfilled input positions before solving, used for calculating which cells should have a green highlight
     const [unfilledPositions, setUnfilledPositions] = useState(createEntireUnfilledPositions());
 
@@ -121,6 +126,7 @@ function App() {
             const newGrid = [...grid.map(row => [...row])];
             newGrid[rowIndex][colIndex] = -1;
             setGrid(newGrid);
+            setIsFull(checkIfFull(newGrid));
             return;
         }
 
@@ -150,7 +156,7 @@ function App() {
         newGrid[rowIndex][colIndex] = numVal;
         setGrid(newGrid);
         updateUnfilledPositions(newGrid);
-
+        setIsFull(checkIfFull(newGrid));
     }
 
     // update unfilledPositions, use a passed-in grid for synchronization purposes
@@ -211,7 +217,8 @@ function App() {
         if (result?.solution) {
             setGrid(result.solution);
             setIsSolved(true);
-            setError("");
+            setIsFull(true);
+            setError(result.is_unique ? "" : "Warning: This puzzle has more than 1 solution");
         } else {
             setError(noSolutionError);
         }
@@ -223,6 +230,7 @@ function App() {
         updateUnfilledPositions(prevGrid);
         setError("");
         setIsSolved(false);
+        setIsFull(false);
     }
     
     // reset by emptying grid and updating state of system
@@ -265,11 +273,18 @@ function App() {
 
         // if there was a server error, it's passed as null - return
         if (result == null) {
-            return
+            return;
         } 
 
         // case: a solution exists
         if (result?.solution) {
+            if (!result.is_unique) {
+                setError("Warning: This puzzle has more than 1 solution.");
+            } else {
+                // clear any previous error
+                setError("");
+            }
+
             // copy the current grid into newGrid
             const newGrid = [...grid.map((row) => [...row])];
             // make unfilledPositions into an array and select a random element from it
@@ -292,6 +307,7 @@ function App() {
             setTimeout(() => {
                 setHintElem(null);
             }, 1500);
+
 
         } else {
             // case: no solution
@@ -364,22 +380,55 @@ function App() {
         return false;
     }
 
+    const checkIfFull = (currGrid) => {
+        for (let i = 0; i < 9; i++) {
+            for (let j = 0; j < 9; j++) {
+                if (currGrid[i][j] == -1) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    const handleGenerate = async () => {
+        try {
+            // send board to server and return result
+            const response = await fetch('http://localhost:5000/generate', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+            const result = await response.json();
+            setGrid(result.board);
+            setError("");
+            setUnfilledPositions(result.board);
+            setIsFull(false);
+            setIsSolved(false);
+        } catch (err) {
+            // return null if there's a server error
+            setError(serverError);
+            return null;
+        }
+    }
+
     return (
         <div className="flex flex-col items-center justify-start">
             <div className="fixed inset-0 -z-10 bg-cover bg-center opacity-40"
                 style={{ backgroundImage: "url('/src/assets/paper-background.jpg')" }}>
             </div>
             {/* modal for CSV upload button */}
-            { showCSVModal && <CSVModal setShowCSVModal={setShowCSVModal} setError={setError} setGrid={setGrid} hasDuplicates={hasDuplicates} updateUnfilledPositions={updateUnfilledPositions}></CSVModal>}
+            { showCSVModal && <CSVModal setShowCSVModal={setShowCSVModal} setError={setError} setGrid={setGrid} hasDuplicates={hasDuplicates} updateUnfilledPositions={updateUnfilledPositions} setIsFull={setIsFull} checkIfFull={checkIfFull} setIsSolved={setIsSolved}></CSVModal>}
 
             {/* modal for upload button */}
-            {showImageModal && <ImageModal setShowImageModal={setShowImageModal} setError={setError} setGrid={setGrid} setShowConfirmationModal={setShowConfirmationModal} updateUnfilledPositions={updateUnfilledPositions}></ImageModal>}
+            {showImageModal && <ImageModal setShowImageModal={setShowImageModal} setError={setError} setGrid={setGrid} setShowConfirmationModal={setShowConfirmationModal} updateUnfilledPositions={updateUnfilledPositions} setIsFull={setIsFull} checkIfFull={checkIfFull} setIsSolved={setIsSolved}></ImageModal>}
 
             {/* confirmation modal for image parsing */}
             {showConfirmationModal && <ImageConfirmationModal setShowConfirmationModal={setShowConfirmationModal}></ImageConfirmationModal>}
             
             {/* Header: title and hint icon */}
-            <Header isSolved={isSolved} handleHint={handleHint}></Header>
+            <Header isSolved={isSolved} handleHint={handleHint} isFull={isFull}></Header>
             
             {/* optional error that appears/disappears under title */}
             <p className="text-lg text-red-500 mt-1 mb-2">
@@ -438,12 +487,13 @@ function App() {
                     ))}
                 </div>
                 {/* Buttons */}
-                <div className="flex flex-row space-between mb-5 w-full justify-between">
-                    <SolveButton grid={grid} error={error} handleSolve={handleSolve}></SolveButton>
+                <div className="flex flex-row space-between mb-5 w-[115%] justify-between self-center">
+                    <SolveButton grid={grid} error={error} handleSolve={handleSolve} isFull={isFull}></SolveButton>
                     <UnsolveButton isSolved={isSolved} handleUnsolve={handleUnsolve}></UnsolveButton>
                     <ResetButton handleReset={handleReset}></ResetButton>
                     <CSVButton setShowCSVModal={setShowCSVModal}></CSVButton>
                     <ImageButton isSolved={isSolved} setShowImageModal={setShowImageModal}></ImageButton>
+                    <RandomButton handleGenerate={handleGenerate}></RandomButton>
                 </div>
             </div>
         </div>

@@ -1,7 +1,7 @@
 import Papa from 'papaparse';
 const csvDimensionError = "Incorrect CSV format: wrong dimensions";
 
-function CSVModal({setShowCSVModal, setError, setGrid, hasDuplicates, updateUnfilledPositions}) {
+function CSVModal({setShowCSVModal, setError, setGrid, hasDuplicates, updateUnfilledPositions, setIsFull, checkIfFull, setIsSolved}) {
     
     const handleCSV = async (e) => {
         // prevent form from refreshing
@@ -20,7 +20,6 @@ function CSVModal({setShowCSVModal, setError, setGrid, hasDuplicates, updateUnfi
             header: false,
             skipEmptyLines: true,
             complete: (results) => {
-                console.log('Parsed CSV data:', results.data);
                 // make sure there are 9 rows
                 if (results.data.length != 9) {
                     setError(csvDimensionError);
@@ -79,7 +78,8 @@ function CSVModal({setShowCSVModal, setError, setGrid, hasDuplicates, updateUnfi
                 setError("");
                 setGrid(results.data);
                 updateUnfilledPositions(results.data);
-                
+                setIsFull(checkIfFull(results.data));
+                setIsSolved(false);
             }
         })
         

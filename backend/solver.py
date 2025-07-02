@@ -1,7 +1,6 @@
 import math
 import copy
-import csv
-import io
+import random
 
 # check that no two elements in a row are the same
 def check_row(board: list, assigned: dict, row_index: int):
@@ -141,48 +140,75 @@ def forward_checking(to_assign: dict, possible_value: str, row_index: int, col_i
     return True
 
 # recursive helper function for solve
-def recursive_backtracking(board: list, to_assign: dict, assigned: dict):
+def recursive_backtracking(board: list, to_assign: dict, solutions: list, assigned: dict):
     # if assignment complete, then return assignment
     if (len(to_assign) == 0 and satisfies_constraints(board, assigned)):
         # add each assignment from assigned to the board and return the completed board
         for elem in assigned:
             board[elem[0]][elem[1]] = assigned[elem]
-        return board
+
+        current_solution = copy.deepcopy(board)
+
+        # case: this is the first solution -> continue to see if there's another distinct one
+        if len(solutions) == 0:
+            solutions.append(current_solution)
+            return True
+
+        # case:  already seen this exact solution → it's unique
+        if current_solution == solutions[0]:
+            return True
+
+        # case: solution is different → not unique
+        solutions.append(current_solution)
+        return False
     
     # sort the dictionary by domain size and get the variable with the smallest domain
     # note: elem is of the form ((row, col), ['possible_value1', 'possible_value2', etc])
     elem = sorted(to_assign.items(), key=lambda x: len(x[1]))[0]
 
+    var = elem[0] # row, col
+    values = elem[1][:] # domain list
+    random.shuffle(values)
+
     # try each possible value in the element's domain until one works
-    for possible_value in elem[1]:
+    for possible_value in values:
         # make a copy of the variables and domains in to_assign, in case backtracking is triggered
         to_assign_copy = copy.deepcopy(to_assign)
 
         # add the assignment to assigned, remove the variable from to_assign
-        assigned[(elem[0][0], elem[0][1])] = possible_value
-        to_assign.pop((elem[0][0], elem[0][1]))
+        assigned[var] = possible_value
+        to_assign.pop(var)
 
         # if the assignment satisfies the constraints, and forward-checking doesn't leave any domains empty, recurse to next variable
-        if satisfies_constraints(board, assigned) and forward_checking(to_assign, possible_value, elem[0][0], elem[0][1]):
-            result = recursive_backtracking(board, to_assign, assigned)
-            # success! return resulting board
-            if result != None:
-                    return result
+        if satisfies_constraints(board, assigned) and forward_checking(to_assign, possible_value, var[0], var[1]):
+            continue_search = recursive_backtracking(board, to_assign, solutions, assigned)
+            # early exit
+            if not continue_search:
+                    return False
                 
         # otherwise, backtrack by removing the assignment from assigned and restoring the to_assign
-        assigned.pop((elem[0][0], elem[0][1]))
+        assigned.pop(var)
         to_assign = to_assign_copy
 
     # case: no solution
-    return None
+    return True
         
 # the main algorithm for solving the sudoku puzzle
 def solve(board: list, to_assign: dict):
     assigned = {}
     # get the initial variables to assign with the calculated domains
     to_assign = calculate_initial_domains(board, to_assign)
-    # recursively backtrack until an answer or None is found!
-    return recursive_backtracking(board, to_assign, assigned)
+    solutions = []
+
+    # recursively backtrack until an answer is found
+    is_unique = recursive_backtracking(board, to_assign, solutions, assigned)
+
+    if len(solutions) == 0:
+        return None, False  # no solution at all
+    if is_unique:
+        return solutions[0], True  # unique solution
+    else:
+        return solutions[0], False  # multiple solutions
 
 # initialize the domains of the unassigned variables in to_assign
 def calculate_initial_domains(board: list, to_assign: dict):
@@ -226,3 +252,52 @@ def calculate_domain(board: list, row_index: int, col_index: int):
         else:
             curr_row += 1
     return domain
+
+def generate_board():
+    # create empty 9 x 9 board
+    board = [[-1 for _ in range(9)] for _ in range(9)]
+
+    # populate to_assign
+    to_assign = {}
+    for row_index, row in enumerate(board):
+        for col_index, elem in enumerate(row):
+            to_assign[(row_index, col_index)] = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        
+    assigned = {}
+
+    solutions = []
+    new_board, is_unique = solve(board, to_assign)
+
+    number_to_remove = random.randint(30, 60)
+    removed = 0
+
+    while (removed < number_to_remove):
+        # pick a random filled cell
+        row = random.randint(0, 8)
+        col = random.randint(0, 8)
+
+        # case: picked cell is already empty, so skip
+        if new_board[row][col] == -1:
+            continue
+        
+        # keep track of value that was removed, in case we have to restore
+        temp = new_board[row][col]
+        # set to -1 to remove the value
+        new_board[row][col] = -1
+
+        # prepare test board and to_assign for uniqueness check
+        test_board = copy.deepcopy(new_board)
+        test_to_assign = {(r, c): [] for r in range(9) for c in range(9) if test_board[r][c] == -1}
+        test_to_assign = calculate_initial_domains(test_board, test_to_assign)
+
+        _, still_unique = solve(test_board, test_to_assign)
+
+        if still_unique:
+            # removal successful
+            removed += 1
+        else:
+            # restore and exit early
+            new_board[row][col] = temp
+            break
+
+    return new_board

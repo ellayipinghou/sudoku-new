@@ -4,7 +4,7 @@ import Spinner from 'react-bootstrap/Spinner';
 const imageCancelError = "Image upload cancelled";
 const serverError = "Server error: check connection and try again";
 
-function ImageModal({setShowImageModal, setError, setGrid, setShowConfirmationModal, updateUnfilledPositions}) {
+function ImageModal({setShowImageModal, setError, setGrid, setShowConfirmationModal, updateUnfilledPositions, setIsFull, checkIfFull, setIsSolved}) {
         
     // load spinner while waiting for image parsing
     const [showLoadSpinner, setShowLoadSpinner] = useState(false);
@@ -48,6 +48,8 @@ function ImageModal({setShowImageModal, setError, setGrid, setShowConfirmationMo
                 setShowConfirmationModal(true);
                 setError("");
                 updateUnfilledPositions(data.grid);
+                setIsFull(checkIfFull(data.grid));
+                setIsSolved(false);
             } else {
                 // else, show error
                 setError(serverError);

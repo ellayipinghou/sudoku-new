@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-function Header({submitted, handleHint}) {
+function Header({isSolved, handleHint, isFull}) {
 
     // true when hovering over lightbulb
     const [showHintText, setShowHintText] = useState(false);
@@ -8,10 +8,10 @@ function Header({submitted, handleHint}) {
     return (
         <div className="relative">
             {/* hint button */}
-            <button disabled={submitted} 
+            <button disabled={isSolved || isFull} 
                 onMouseEnter={() => setShowHintText(true)}
                 onMouseLeave={() => setShowHintText(false)} 
-                className={`absolute left-[105%] bottom-[50%] ${submitted ? "cursor-not-allowed" : ""}`} 
+                className={`absolute left-[105%] bottom-[50%] ${(isSolved || isFull) ? "cursor-not-allowed" : ""}`} 
                 onClick={handleHint}
                 >
                 {/* lightbulb icon */}

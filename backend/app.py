@@ -5,6 +5,7 @@ from flask_cors import CORS
 from solver import solve
 from read_image import parser
 import os
+from solver import generate_board
 
 app = Flask(__name__)
 
@@ -23,24 +24,50 @@ def solve_sudoku():
                 grid = data.get('grid')
 
                 # add empty cells to to_assign, used in solve() function
-                to_assign = {}
-                for row_index, row in enumerate(grid):
-                        for col_index, elem in enumerate(row):
-                                if grid[row_index][col_index] == -1:
-                                        to_assign[(row_index, col_index)] = []
-
-                print(to_assign)
+                to_assign = {(r, c): [] for r in range(9) for c in range(9) if grid[r][c] == -1}
 
                 # get solution
-                solution = solve(grid, to_assign)
+                solution, is_unique = solve(grid, to_assign)
 
-                # return the solution found by the solver
-                return jsonify({"message": "Solution", "solution": solution})
+                # if no solution found, return null response
+                if solution is None:
+                        return jsonify({
+                                "message": "No solution found",
+                                "solution": None,
+                                "is_unique": False
+                        }), 200
+
+                # return the solution and uniqueness
+                return jsonify({
+                        "message": "Solution found",
+                        "solution": solution,
+                        "is_unique": is_unique
+                        }), 200
         
         # return server error
         except Exception as e:
                 print("Error in /solve route:", str(e))
-                return jsonify({'message': 'Internal server error', 'error': str(e)}), 500
+                return jsonify({
+                        "message": "Internal server error",
+                        "error": str(e)
+                }), 500
+        
+# generate route, generates puzzle board
+@app.route('/generate', methods=['GET'])
+def generate():
+        try:
+                board = generate_board()
+                return jsonify({
+                        "message": "Board generated",
+                        "board": board,
+                })
+        
+        except Exception as e:
+                print("Error in /generate route:", str(e))
+                return jsonify({
+                        "message": "Internal server error", 
+                        "error": str(e)
+                }), 500
 
 # image route, used by upload image button on frontend
 @app.route('/image', methods=['POST'])
@@ -68,12 +95,18 @@ def parse_image():
                         return '', 499
                 
                 # return the grid parsed from the image
-                return jsonify({"message": "received image: " + file.filename, "grid": grid})
+                return jsonify({
+                        "message": "received image: " + file.filename, 
+                        "grid": grid
+                })
         
         # return server error
         except Exception as e:
                 print("Error in /image route:", str(e))
-                return jsonify({'message': 'Internal server error', 'error': str(e)}), 500
+                return jsonify({
+                        "message": "Internal server error", 
+                        "error": str(e)
+                }), 500
 
 
 if __name__ == '__main__':
