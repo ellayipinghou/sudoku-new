@@ -90,7 +90,7 @@ npm run dev
 ```
 
 ## Credits for Image Recognition Model ©️
-The Sudoku Solver uses a digit recognition model trained on the [Kaggle Printed Digits Dataset](https://www.kaggle.com/datasets/kshitijdhama/printed-digits-dataset) , Copyright (c) 2021 Kshitij Dhama. The model is stored in the file new_digit_model.keras and is used for digit classification when an image of a Sudoku puzzle is uploaded.
+The Sudoku Solver uses a digit recognition model built by Kshitij Dhama and trained on the [Kaggle Printed Digits Dataset](https://www.kaggle.com/datasets/kshitijdhama/printed-digits-dataset), Copyright (c) 2021. In this application, the model is stored in the file new_digit_model.keras and is used for digit classification when an image of a Sudoku puzzle is uploaded.
 
 If you plan to distribute this app or use the dataset in any way, please make sure to give proper credit to the original dataset creator.
 
