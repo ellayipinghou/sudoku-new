@@ -90,6 +90,19 @@ cd backend
 flask run
 ```
 
+## Test Files 📂
+You can test the solve, CSV input, and image input features by uploading your own files to the frontend, or by using the examples located in backend/csv_inputs and backend/image_inputs.
+
+**CSV Inputs**:
+  - full_input.csv – A completely solved and valid Sudoku input.
+  - invalid_input.csv – Contains an invalid input (duplicate values).
+  - test_input.csv – A regular incomplete, valid Sudoku input.
+
+**Image Inputs**:
+- sudoku_picture_1.jpg – A Sudoku board from a photo with a non-flat perspective.
+- sudoku_picture_2.jpg – A screenshot with lots of words/images outside the board.
+ - sudoku_picture_3.jpg – A clean, regular screenshot of a Sudoku board.
+
 ## Credits for Image Recognition Model ©️
 The Sudoku Solver uses a digit recognition model built by Kshitij Dhama and trained on the [Kaggle Printed Digits Dataset](https://www.kaggle.com/datasets/kshitijdhama/printed-digits-dataset), Copyright (c) 2021. In this application, the model is stored in the file new_digit_model.keras and is used for digit classification when an image of a Sudoku puzzle is uploaded.
 
