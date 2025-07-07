@@ -1,7 +1,7 @@
 # Sudoku Solver 🔎
 
 ## Overview 📜
-This is a full-stack web application designed to solve Sudoku puzzles, with support for various input modes. The application utilizes a backtracking algorithm for solving puzzles and a digit recognition model for processing Sudoku images. The backend is built using Python and Flask, while the frontend leverages React, Tailwind CSS, and Vite for a smooth user experience.
+This is a full-stack web application designed to solve Sudoku puzzles, with support for various input modes. The application utilizes a backtracking algorithm with forward-checking for solving puzzles and a digit recognition model for processing Sudoku images. The backend is built using Python and Flask, while the frontend leverages React, Tailwind CSS, and Vite for a smooth user experience.
 
 ## Input Modes 💻
 * ✏️ **Manual Input:** Input Sudoku puzzles by typing the board into the interface.
