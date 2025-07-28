@@ -1,0 +1,15 @@
+I provide 6 csv inputs to test both the csv parsing functionality and the sudoku solver functionality:
+
+	1) easy_input_1.csv - easy puzzle
+	2) easy_input_2.csv - easy puzzle generated using https://sudoku.com/
+	3) hard_input_1.csv - hard puzzle
+	4) hard_input_2.csv - hard puzzle generated using https://sudoku.com/
+	5) extreme_input.csv - extreme puzzle generated using https://sudoku.com/
+	6) extreme_extreme_input.csv - extreme puzzle named the most difficult sudoku puzzle of all time, from https://abcnews.go.com/blogs/headlines/2012/06/can-you-solve-the-hardest-ever-sudoku 
+	7) full_input.csv - valid puzzle board with every cell filled in
+	8) invalid_input_1.csv - invalid puzzle with duplicate value
+	9) invalid_input_2.csv - invalid puzzle with extra column in row 7
+	10) invalid_input_3.csv - invalid puzzle with extra row
+	11) invalid_input_4.csv - invalid puzzle with an invalid character (0)
+
+Each valid input file is accompanied by a corresponding .txt file with the expected solution.
