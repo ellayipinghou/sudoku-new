@@ -94,14 +94,30 @@ flask run
 You can test the solve, CSV input, and image input features by uploading your own files to the frontend, or by using the examples located in backend/csv_inputs and backend/image_inputs.
 
 **CSV Inputs**:
-  - full_input.csv – A completely solved and valid Sudoku input.
-  - invalid_input.csv – Contains an invalid input (duplicate values).
-  - test_input.csv – A regular incomplete, valid Sudoku input.
+
+I provide 11 csv inputs to test both the csv parsing functionality and the sudoku solver functionality:
+
+1) easy_input_1.csv - easy puzzle
+2) easy_input_2.csv - easy puzzle generated using https://sudoku.com/
+3) hard_input_1.csv - hard puzzle
+4) hard_input_2.csv - hard puzzle generated using https://sudoku.com/
+5) extreme_input.csv - extreme puzzle generated using https://sudoku.com/
+6) extreme_extreme_input.csv - extreme puzzle named the most difficult sudoku puzzle of all time, from https://abcnews.go.com/blogs/headlines/2012/06/can-you-solve-the-hardest-ever-sudoku 
+7) full_input.csv - valid puzzle board with every cell filled in
+8) invalid_input_1.csv - invalid puzzle with duplicate value
+9) invalid_input_2.csv - invalid puzzle with extra column in row 7
+10) invalid_input_3.csv - invalid puzzle with extra row
+11) invalid_input_4.csv - invalid puzzle with an invalid character (0)
+
+Each valid input file is accompanied by a corresponding .txt file with the expected solution.
 
 **Image Inputs**:
-- sudoku_picture_1.jpg – A Sudoku board from a photo with a non-flat perspective.
-- sudoku_picture_2.jpg – A screenshot with lots of words/images outside the board.
- - sudoku_picture_3.jpg – A clean, regular screenshot of a Sudoku board.
+
+I provide 3 image inputs to test image processing and digit classification functionality:
+
+1) sudoku_picture_1.jpg – A Sudoku board from a photo with a non-flat perspective.
+2) sudoku_picture_2.jpg – A screenshot with lots of words/images outside the board.
+3) sudoku_picture_3.jpg – A clean, regular screenshot of a Sudoku board.
 
 ## Credits for Image Recognition Model ©️
 The Sudoku Solver uses a digit recognition model built by Kshitij Dhama and trained on the [Kaggle Printed Digits Dataset](https://www.kaggle.com/datasets/kshitijdhama/printed-digits-dataset), Copyright (c) 2021. In this application, the model is stored in the file new_digit_model.keras and is used for digit classification when an image of a Sudoku puzzle is uploaded.
