@@ -1,4 +1,4 @@
-I provide 6 csv inputs to test both the csv parsing functionality and the sudoku solver functionality:
+I provide 11 csv inputs to test both the csv parsing functionality and the sudoku solver functionality:
 
 	1) easy_input_1.csv - easy puzzle
 	2) easy_input_2.csv - easy puzzle generated using https://sudoku.com/
